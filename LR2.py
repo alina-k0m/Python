@@ -124,7 +124,22 @@ def shell_sort(num):
             num[j] = temp
         # Уменьшаем интервал
         gap //= 2
+    return num
 
+
+# Шейкерная сортировка
+def shaker_sort(num):
+    for i in range(len(num)//2):
+        for j in range(len(num)-1-i):
+            if num[j] > num[j+1]:
+                a = num[j]
+                num[j] = num[j+1]
+                num[j+1] = a
+        for j in range(len(num)-2-i, i+1, -1):
+            if num[j] < num[j-1]:
+                a = num[j]
+                num[j] = num[j-1]
+                num[j-1] = a
     return num
 
 
@@ -137,6 +152,7 @@ sort_functions = {
     'Quick Sort': quick_sort,
     'Heap Sort': heap_sort,
     'Shell Sort': shell_sort,
+    'Shaker Sort': shaker_sort,
 }
 
 # Генерация наборов данных разных размеров для анализа
