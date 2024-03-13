@@ -1,69 +1,178 @@
-# # # сортировка
-#
+# # # СОРТИРОВКА
+
+#3 алгоритма сортировки.
+# Сравнить их по времени,
+# вывести в таблицу и
+# построить график
+
+import timeit
+import random
+import matplotlib.pyplot as plt
+
+
 # Сортировка пузырьком
-def bubble_sort(arr):
-    n = len(arr)
+def bubble_sort(num):
+    n = len(num)
     for i in range(n):
         for j in range(0, n-i-1):
-            if arr[j] > arr[j+1] :
-                arr[j], arr[j+1] = arr[j+1], arr[j]
-    return arr
+            if num[j] > num[j+1] :
+                num[j], num[j+1] = num[j+1], num[j]
+    return num
 
-# Сортировка вставками
-def insertion_sort(arr):
-    for i in range(1, len(arr)):
-        key = arr[i]
+
+# Функция сортировки выбором select
+def selection_sort(num):
+        # Traverse through all array elements
+        for i in range(len(num)):
+            # Find the minimum element in remaining unsorted array
+            min_idx = i
+            for j in range(i + 1, len(num)):
+                if num[min_idx] > num[j]:
+                    min_idx = j
+
+            # Swap the found minimum element with the first element
+            num[i], num[min_idx] = num[min_idx], num[i]
+        return num
+
+
+# Сортировка вставками insert
+def insertion_sort(num):
+    for i in range(1, len(num)):
+        key = num[i]
         j = i-1
-        while j >=0 and key < arr[j] :
-                arr[j + 1] = arr[j]
+        while j >=0 and key < num[j] :
+                num[j + 1] = num[j]
                 j -= 1
-        arr[j + 1] = key
-    return arr
+        num[j + 1] = key
+    return num
+
+
+# Функция сортировки слиянием merge
+def merge_sort(num):
+    if len(num) > 1:
+        mid = len(num) // 2  # находим середину массива
+
+        # делим массив на две части
+        L = num[:mid]
+        R = num[mid:]
+
+        # рекурсивно сортируем две половины
+        merge_sort(L)
+        merge_sort(R)
+
+        i = j = k = 0
+
+        # сливаем отсортированные половины в один массив
+        while i < len(L) and j < len(R):
+            if L[i] < R[j]:
+                num[k] = L[i]
+                i += 1
+            else:
+                num[k] = R[j]
+                j += 1
+            k += 1
+
+        # проверяем, не осталось ли элементов в какой-либо из половин
+        while i < len(L):
+            num[k] = L[i]
+            i += 1
+            k += 1
+
+        while j < len(R):
+            num[k] = R[j]
+            j += 1
+            k += 1
+        return num
+
 
 # Быстрая сортировка
-def quick_sort(arr):
-    if len(arr) <= 1:
-        return arr
-    pivot = arr[len(arr) // 2]
-    left = [x for x in arr if x < pivot]
-    middle = [x for x in arr if x == pivot]
-    right = [x for x in arr if x > pivot]
+def quick_sort(num):
+    if len(num) <= 1:
+        return num
+    pivot = num[len(num) // 2]
+    left = [x for x in num if x < pivot]
+    middle = [x for x in num if x == pivot]
+    right = [x for x in num if x > pivot]
     return quick_sort(left) + middle + quick_sort(right)
 
 
-import timeit
+# Пирамидальная сортировка (HeapSort), сортировка кучей
+import heapq
+def heap_sort(num):
+    # Создаем кучу из итерируемого объекта
+    heap = list(num)
+    heapq.heapify(heap)
 
-# Замеряем время выполнения для каждой функции сортировки
-def time_sorting(sort_function, arr):
-    start_time = timeit.default_timer()
-    sort_function(arr.copy())
-    return timeit.default_timer() - start_time
+    # Извлекаем элементы из кучи по одному, получая их в отсортированном порядке
+    return [heapq.heappop(heap) for i in range(len(heap))]
 
-data = [5, 2, 9, 1, 5, 6]
 
-# Измеряем время
-bubble_time = time_sorting(bubble_sort, data)
-insertion_time = time_sorting(insertion_sort, data)
-quick_time = time_sorting(quick_sort, data)
+# Функция сортировки Шелла shell - модификация сортировки вставками
+def shell_sort(num):
+    n = len(num)
+    gap = n // 2  # Начальный интервал
 
-# Составляем таблицу с помощью pandas
-import pandas as pd
+    # Производим сортировку с разными интервалами
+    while gap > 0:
+        for i in range(gap, n):
+            temp = num[i]
+            j = i
+            # Производим сортировку вставками для этого интервала
+            while j >= gap and num[j - gap] > temp:
+                num[j] = num[j - gap]
+                j -= gap
+            num[j] = temp
+        # Уменьшаем интервал
+        gap //= 2
 
-results = pd.DataFrame({
-    'Sort Method': ['Bubble Sort', 'Insertion Sort', 'Quick Sort'],
-    'Time (seconds)': [bubble_time, insertion_time, quick_time]
-})
+    return num
 
-print(results)
 
-# Построение графика
-import matplotlib.pyplot as plt
+# Словарь функций сортировки
+sort_functions = {
+    'Bubble Sort': bubble_sort,
+    'Selection Sort': selection_sort,
+    'Insertion Sort': insertion_sort,
+    'Merge Sort': merge_sort,
+    'Quick Sort': quick_sort,
+    'Heap Sort': heap_sort,
+    'Shell Sort': shell_sort,
+}
 
-plt.figure(figsize=(10, 6))
-plt.barh(results['Sort Method'], results['Time (seconds)'])
-plt.xlabel('Time in seconds')
-plt.title('Sorting Algorithms Time Comparison')
+# Генерация наборов данных разных размеров для анализа
+array_sizes = [100, 200, 300, 400, 500]
+performance_results = {name: [] for name in sort_functions}
+
+# Запуск сортировок и измерение времени исполнения
+for size in array_sizes:
+    data = [random.randint(0, 10000) for _ in range(size)]
+    for name, sort_function in sort_functions.items():
+        stmt = f'sort_function(list(data))'
+        setup = f'from __main__ import sort_function, data'
+        times = timeit.timeit(stmt, setup=setup, number=1)
+        performance_results[name].append(times)
+
+        print(f"{name} with array size {size}: {times:.6f} seconds")
+
+# Создание таблицы результатов
+print("\nPerformance Table:")
+print(f"{'Size':<10}{' | '.join(sort_functions.keys())}")
+for i, size in enumerate(array_sizes):
+    results = [performance_results[name][i] for name in sort_functions]
+    print(f"{size:<10}{' | '.join(f'{res:.6f}' for res in results)}")
+
+# Построение графика производительности
+plt.figure(figsize=(10, 8))
+for name, times in performance_results.items():
+    plt.plot(array_sizes, times, label=name)
+
+plt.xlabel('Array Size')
+plt.ylabel('Time (seconds)')
+plt.title('Sorting Algorithm Performance Comparison')
+plt.legend()
+plt.grid(True)
 plt.show()
+
 
 
 
