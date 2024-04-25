@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Новости</title>
+</head>
+<body>
+<h2>Лента новостей</h2>
+<ul>
+    {% for item in news %}
+        <li><strong>{{ item.news_text }}</strong> - опубликовано {{ item.published_date }}</li>
+        <p>{{ item.content }}</p>
+    {% endfor %}
+</ul>
+</body>
+</html>
