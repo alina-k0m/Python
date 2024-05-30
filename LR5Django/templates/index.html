@@ -1,27 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<h1>Available Riddles</h1>
-{% if message %}
-    <p><strong>{{ message }}</strong></p>
-{% endif %}
-{% if latest_riddles %}
-    <ul>
-        {% for riddle in latest_riddles %}
-            <li>
-                <a href="/riddles/{{ riddle.id }}/">
-                    {{ riddle.riddle_text }}
-                </a>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No riddles are available right now.</p>
-{% endif %}
-</body>
-</html>
+{% extends 'base.html' %}
+{% block main %}
+    <h4 class="card-title">Available Riddles</h4>
+    {% if message %}
+        <p class="alert alert-success">
+            <strong>{{ message }}</strong>
+        </p>
+    {% endif %}
+    {% if latest_riddles %}
+        <ul>
+            {% for riddle in latest_riddles %}
+                <li>
+                    <a href="/riddles/{{ riddle.id }}/">
+                        {{ riddle.riddle_text }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No riddles are available right now.</p>
+    {% endif %}
+{% endblock %}
+
 

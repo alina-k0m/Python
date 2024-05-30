@@ -1,26 +1,103 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<h1>{{ riddle.riddle_text }}</h1>
-<p>    <strong>{{ method }}</strong>    </p>
-{% if error_message %}
-    <p>
-        <strong>{{ error_message }}</strong>
-    </p>
-{% endif %}
-<form action="answer/" method="post">
-    {% csrf_token %}
-    {% for option in riddle.option_set.all %}
-        <input type="radio" name="option" id="option{{ forloop.counter }}" value="{{ option.id }}" />
-        <label for="option{{ forloop.counter }}">
-            {{ option.text }}
-        </label><br>
-    {% endfor %}
-    <input type="submit" value="Answer" />
-</form>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block main %}
+    <h4 class="card-title">{{ riddle.riddle_text }}</h4>
+    {% if error_message %}
+        <p class="alert alert-danger">
+            <strong>{{ error_message }}</strong>
+        </p>
+    {% endif %}
+    <form action="answer/" method="post">
+        {% csrf_token %}
+        {% for option in riddle.option_set.all %}
+            <input type="radio" name="option"
+                   id="option{{ forloop.counter }}"
+                   value="{{ option.id }}"/>
+            <label for="option{{ forloop.counter }}">
+                {{ option.text }}
+            </label><br>
+        {% endfor %}
+        <input type="submit" value="Answer"/>
+    </form>
+
+
+
+    <hr>
+    <h4>Chat</h4>
+    {% if user.is_authenticated %}
+        <form action="post/" method="post">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <input type="text"
+                       class="form-control"
+                       placeholder="Your message"
+                       name="message"/>
+                <div class="input-group-append">
+                    <input class="btn btn-success"
+                           type="submit"
+                           value="Send"/>
+                </div>
+            </div>
+        </form>
+    {% endif %}
+
+    <div id="history">
+        {% for message in latest_messages %}
+            <div class="card">
+                <div class="card-body">
+                    <strong>
+                        {{ message.author.username }}
+                    </strong>
+                    <br/>
+                    <em>
+                        {{ message.pub_date|date:'Y-m-d H:i:s' }}
+                    </em>
+                    <br/>
+                    {{ message.message }}
+                </div>
+            </div>
+            <br/>
+        {% endfor %}
+    </div>
+
+
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js">
+    </script>
+    <script>
+        function send_msg_update_request() {
+            $.get("msg_list/", {}, parse_msg_update_response);
+        }
+
+        function parse_msg_update_response(data, success) {
+            //alert(data);
+            res = JSON.parse(data);
+            res_str = "";
+            for (i = 0; i < res.length; i++) {
+                // HTML-код вставляемых блоков с сообщениями
+                // скопирован выше - тот, что выводится
+                // при загрузке страницы
+                res_str += '<div class="card">\n' +
+                    '        <div class="card-body">\n' +
+                    '            <strong>\n' +
+                    '                ' + res[i].author__username + '\n' +
+                    '            </strong>\n' +
+                    '            <br/>\n' +
+                    '            <em>\n' +
+                    '                ' + res[i].pub_date + '\n' +
+                    '            </em>\n' +
+                    '            <br/>\n' +
+                    '            ' + res[i].message + '\n' +
+                    '        </div>\n' +
+                    '        </div>\n' +
+                    '        <br/>'
+            }
+            $("#history").html(res_str);
+        }
+
+        setInterval(send_msg_update_request, 5000);
+    </script>
+
+
+
+{% endblock %}
+
